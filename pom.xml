@@ -21,6 +21,8 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <!-- TODO: Build without including aws dependencies in JAR,
+            to Explore if they are available in Lambda runtime already [on AWS itself]  -->
         <dependency>
             <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core/1.2.0 -->
             <groupId>com.amazonaws</groupId>
