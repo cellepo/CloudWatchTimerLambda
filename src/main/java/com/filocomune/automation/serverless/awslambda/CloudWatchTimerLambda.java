@@ -5,6 +5,7 @@ import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEventsClientBuild
 import com.amazonaws.services.cloudwatchevents.model.DisableRuleRequest;
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.filocomune.automation.serverless.awslambda.util.CloudWatchUtil;
 import com.filocomune.automation.serverless.awslambda.util.S3Util;
 
 import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeUtil.log;
@@ -28,9 +29,6 @@ public class CloudWatchTimerLambda {
 
     protected final String s3BucketName = System.getenv("S3_BUCKET_NAME");
 
-    private static final AmazonCloudWatchEvents amazonCloudWatchEvents
-            = AmazonCloudWatchEventsClientBuilder.defaultClient();
-
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
         // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduled-events.html
@@ -40,14 +38,9 @@ public class CloudWatchTimerLambda {
             final long scheduledEventRuleExpirationMillis
                     = Long.parseLong(S3Util.getString(s3BucketName, timedExpirationKey));
             if(scheduledEventRuleExpirationMillis < System.currentTimeMillis()){
-                // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduled-events.html
-                final String cloudWatchRuleNameARNPrefix = ":rule/";
-                final String cloudWatchRuleName = scheduledEventARN.substring(
-                        scheduledEventARN.indexOf(cloudWatchRuleNameARNPrefix) + cloudWatchRuleNameARNPrefix.length());
+                CloudWatchUtil.disableRule(scheduledEventARN);
+                log( "  (expired at " + scheduledEventRuleExpirationMillis + ")");
 
-                amazonCloudWatchEvents.disableRule(new DisableRuleRequest().withName(cloudWatchRuleName));
-                log(scheduledEventARN + " disabled\n" +
-                        "  (expired at " + scheduledEventRuleExpirationMillis + ")");
 
             } else {
                 log(timedExpirationKey + " is " + scheduledEventRuleExpirationMillis);
