@@ -1,5 +1,7 @@
 package com.filocomune.automation.serverless.awslambda;
 
+import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeUtil.log;
+
 /**
  * Action "logs:*" (in i.e: Policy "CloudWatchLogsFullAccess")\n
  */
@@ -7,7 +9,7 @@ package com.filocomune.automation.serverless.awslambda;
 public class SimplestLambda {
 
     public void handle(String s) {
-        System.out.println("Hello, " + s);
+        log("Hello, " + s);
     }
 
 }
