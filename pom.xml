@@ -40,6 +40,12 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
         </dependency>
+        <dependency>
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-events/1.11.538 -->
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-events</artifactId>
+            <version>1.11.538</version>
+        </dependency>
     </dependencies>
 
     <!-- https://blog.symphonia.io/learning-lambda-part-2-835172a74428 -->
