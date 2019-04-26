@@ -8,6 +8,15 @@
     <artifactId>CloudWatchTimerLambda</artifactId>
     <version>0.0-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core/1.2.0 -->
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+    </dependencies>
+
     <!-- https://blog.symphonia.io/learning-lambda-part-2-835172a74428 -->
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
