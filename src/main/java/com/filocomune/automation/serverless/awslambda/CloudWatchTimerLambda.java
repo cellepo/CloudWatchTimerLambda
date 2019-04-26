@@ -34,6 +34,19 @@ public class CloudWatchTimerLambda {
 
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
+        manageTimer(scheduledEvent);
+    }
+
+    /**
+     * **Only to be called once per Lambda instantiation,**\n
+     * \n
+     * Keys (by "expiration-<scheduledEventARN>")
+     *  current time String into S3_BUCKET_NAME if not already keyed there to a prior time,
+     *  otherwise disables the CloudWatch Rule and deletes the time stored in S3.
+     *
+     * @param scheduledEvent - {@link ScheduledEvent}
+     */
+    private void manageTimer(ScheduledEvent scheduledEvent){
         // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduled-events.html
         final String scheduledEventARN = scheduledEvent.getResources().get(0);
         final String timedExpirationKey = "expiration-" + scheduledEventARN;
