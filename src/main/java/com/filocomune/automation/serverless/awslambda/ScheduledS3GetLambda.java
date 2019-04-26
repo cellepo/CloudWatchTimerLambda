@@ -7,7 +7,10 @@ import com.amazonaws.services.s3.model.S3Object;
 import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeUtil.log;
 
 /**
- * AWS Lambda triggered by CloudWatch Rule, that gets {@link S3Object} keyed by <s3Key> in <s3BucketName>.\n
+ * AWS Lambda triggered by CloudWatch Rule, that gets {@link S3Object} keyed by S3_KEY in S3_BUCKET_NAME.\n
+ * \n
+ * Lambda Environment Variable "S3_BUCKET_NAME"\n
+ * Lambda Environment Variable "S3_KEY"\n
  * \n
  * Action "logs:*" (in i.e: Policy "CloudWatchLogsFullAccess")\n
  * https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazons3.html\n
@@ -17,8 +20,8 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
 // https://blog.symphonia.io/learning-lambda-1f25af64161c
 public class ScheduledS3GetLambda {
 
-    protected final String s3BucketName = "<s3BucketName>";
-    protected final String s3Key = "<s3Key>";
+    protected final String s3BucketName = System.getenv("S3_BUCKET_NAME");
+    protected final String s3Key = System.getenv("S3_KEY");
 
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
