@@ -15,4 +15,8 @@ public class LambdaRuntimeUtil {
         logger.log(msg);
     }
 
+    public static void log(Exception exception){
+        log(exception.getClass().getName() + ": " + exception.getMessage());
+    }
+
 }
