@@ -25,8 +25,8 @@ public class S3Util {
      * Action "s3:PutObject" (in i.e: Policy "AWSLambdaExecute")\n
      *
      * @param string to put:  Becomes encoded UTF-8.
-     * @param bucketName
-     * @param key
+     * @param bucketName - String
+     * @param key - String
      * @return {@link PutObjectResult}
      * @throws SdkClientException
      */
@@ -42,8 +42,8 @@ public class S3Util {
      * Action "s3:List*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
      * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
      *
-     * @param bucketName
-     * @param key
+     * @param bucketName - String
+     * @param key - String
      * @return {@link S3Object}
      * @throws SdkClientException
      */
@@ -65,7 +65,7 @@ public class S3Util {
      * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
      *
      * @param bucketName
-     * @param key
+     * @param key - String
      * @return String
      * @throws SdkClientException
      */
@@ -89,8 +89,8 @@ public class S3Util {
      * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
      * Action "s3:DeleteObject"\n
      *
-     * @param bucketName
-     * @param key
+     * @param bucketName - String
+     * @param key - String
      */
     public static void delete(String bucketName, String key){
         // Get metadata before deleting

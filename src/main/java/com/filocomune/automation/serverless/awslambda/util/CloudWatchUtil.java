@@ -24,7 +24,7 @@ public class CloudWatchUtil {
      * Action "events:DisableRule"\n
      * Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
      *
-     * @param ruleARN String
+     * @param ruleARN - String
      * @throws {@link AmazonCloudWatchEventsException}
      */
     public static void disableRule(String ruleARN) throws AmazonCloudWatchEventsException {
