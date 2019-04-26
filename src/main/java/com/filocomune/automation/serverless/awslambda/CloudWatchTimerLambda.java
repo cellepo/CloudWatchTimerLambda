@@ -8,9 +8,11 @@ import com.filocomune.automation.serverless.awslambda.util.S3Util;
 import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeUtil.log;
 
 /**
- * AWS Lambda triggered by CloudWatch Rule, that keys (by "expiration-<scheduledEventARN>") current time String
- * into S3_BUCKET_NAME if not already keyed there to a prior time,
- *  otherwise disables the CloudWatch Rule and deletes the time stored in S3.\n
+ * AWS Lambda triggered by CloudWatch Rule,
+ *  that first processes this concrete extension's job (per {@link #process(ScheduledEvent)}),
+ *  and then finally keys (by "expiration-<scheduledEventARN>")
+ *  current time String into S3_BUCKET_NAME (if not already keyed there to a prior time;
+ *  otherwise disables the CloudWatch Rule and deletes the time stored in S3).\n
  * \n
  * Lambda Environment Variable "S3_BUCKET_NAME"\n
  * Lambda Environment Variable "scheduledEventRuleDurationMillis"\n
@@ -25,41 +27,78 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
  * Action "events:DisableRule"\n
  */
 // https://blog.symphonia.io/learning-lambda-1f25af64161c
-public class CloudWatchTimerLambda {
+public abstract class CloudWatchTimerLambda {
 
     protected final String s3BucketName = System.getenv("S3_BUCKET_NAME");
 
     public final long scheduledEventRuleDurationMillis
             = Long.parseLong(System.getenv("SCHEDULED_EVENT_RULE_EXPIRY_DURATION_MILLIS"));
 
+    /**
+     * Implement to process the concrete extension's job.
+     *
+     * @param scheduledEvent {@link ScheduledEvent}
+     */
+    abstract protected void process(ScheduledEvent scheduledEvent);
+
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
-        // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduled-events.html
-        final String scheduledEventARN = scheduledEvent.getResources().get(0);
-        final String timedExpirationKey = "expiration-" + scheduledEventARN;
+        manageTimer(scheduledEvent);
+
+        // Process after managing timer, so that any processing Exception does not prevent management
         try {
-            final long scheduledEventRuleExpirationMillis
-                    = Long.parseLong(S3Util.getString(s3BucketName, timedExpirationKey));
-            if(scheduledEventRuleExpirationMillis < System.currentTimeMillis()){
-                CloudWatchUtil.disableRule(scheduledEventARN);
-                log( "  (expired at " + scheduledEventRuleExpirationMillis + ")");
+            process(scheduledEvent);
 
-                S3Util.delete(s3BucketName, timedExpirationKey);
+        } catch(Exception e) {
+            log(getClass().getName() + "#process throws:");
 
-            } else {
-                log(timedExpirationKey + " is " + scheduledEventRuleExpirationMillis);
+            throw e;
+        }
+    }
+
+    /**
+     * **Only to be called once per Lambda instantiation,**\n
+     * \n
+     * Keys (by "expiration-<scheduledEventARN>")
+     *  current time String into S3_BUCKET_NAME if not already keyed there to a prior time,
+     *  otherwise disables the CloudWatch Rule and deletes the time stored in S3.
+     *
+     * @param scheduledEvent - {@link ScheduledEvent}
+     */
+    private void manageTimer(ScheduledEvent scheduledEvent){
+        try {
+            // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduled-events.html
+            final String scheduledEventARN = scheduledEvent.getResources().get(0);
+            final String timedExpirationKey = "expiration-" + scheduledEventARN;
+            try {
+                final long scheduledEventRuleExpirationMillis
+                        = Long.parseLong(S3Util.getString(s3BucketName, timedExpirationKey));
+                if (scheduledEventRuleExpirationMillis < System.currentTimeMillis()) {
+                    CloudWatchUtil.disableRule(scheduledEventARN);
+                    log("  (expired at " + scheduledEventRuleExpirationMillis + ")");
+
+                    S3Util.delete(s3BucketName, timedExpirationKey);
+
+                } else {
+                    log(timedExpirationKey + " is " + scheduledEventRuleExpirationMillis);
+                }
+
+            } catch (AmazonS3Exception as3e) {
+                if (as3e.getStatusCode() == 404) {   // nothing already stored in S3 with timedExpirationKey
+                    final String scheduleEventRuleExpiryMillis
+                            = String.valueOf(System.currentTimeMillis() + scheduledEventRuleDurationMillis);
+                    S3Util.putString(scheduleEventRuleExpiryMillis, s3BucketName, timedExpirationKey);
+                    log(timedExpirationKey + " is " + scheduleEventRuleExpiryMillis);
+
+                } else {
+                    throw as3e;
+                }
             }
 
-        } catch(AmazonS3Exception as3e){
-            if(as3e.getStatusCode() == 404) {   // nothing already stored in S3 with timedExpirationKey
-                final String scheduleEventRuleExpiryMillis
-                        = String.valueOf(System.currentTimeMillis() + scheduledEventRuleDurationMillis);
-                S3Util.putString(scheduleEventRuleExpiryMillis, s3BucketName, timedExpirationKey);
-                log(timedExpirationKey + " is " + scheduleEventRuleExpiryMillis);
+        } catch(Exception e) {
+            log(getClass().getName() + "#manageTimer throws:");
 
-            } else {
-                throw as3e;
-            }
+            throw e;
         }
     }
 
