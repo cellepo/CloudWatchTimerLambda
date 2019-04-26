@@ -58,4 +58,28 @@ public class S3Util {
         return s3Object;
     }
 
+    /**
+     * Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
+     * Action "s3:List*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
+     * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
+     *
+     * @param bucketName
+     * @param key
+     * @return String
+     * @throws SdkClientException
+     */
+    public static String getString(String bucketName, String key) throws SdkClientException {
+        // Get metadata before string
+        final String stringETag = amazonS3.getObjectMetadata(bucketName, key).getETag();
+        final String string = amazonS3.getObjectAsString(bucketName, key);
+        if(string != null){
+            log("Retrieved [as String] S3Object {eTag: " + stringETag + "}");
+
+        } else {
+            log("null S3Object retrieved");
+        }
+
+        return string;
+    }
+
 }

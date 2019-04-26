@@ -26,7 +26,7 @@ public class ScheduledS3Lambda {
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
         try {
-            S3Util.getObject(s3BucketName, s3Key);
+            S3Util.getString(s3BucketName, s3Key);
 
         } catch(AmazonS3Exception as3e){
             if(as3e.getStatusCode() == 404) {   // nothing already stored in S3 with timedExpirationKey
