@@ -15,6 +15,12 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.0</version>
         </dependency>
+        <dependency>
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-events/2.2.6 -->
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>2.2.6</version>
+        </dependency>
     </dependencies>
 
     <!-- https://blog.symphonia.io/learning-lambda-part-2-835172a74428 -->
