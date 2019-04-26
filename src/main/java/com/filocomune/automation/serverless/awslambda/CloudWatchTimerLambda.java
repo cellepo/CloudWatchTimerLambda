@@ -1,8 +1,5 @@
 package com.filocomune.automation.serverless.awslambda;
 
-import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEvents;
-import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEventsClientBuilder;
-import com.amazonaws.services.cloudwatchevents.model.DisableRuleRequest;
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.filocomune.automation.serverless.awslambda.util.CloudWatchUtil;
@@ -16,6 +13,7 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
  *  otherwise disables the CloudWatch Rule and deletes the time stored in S3.\n
  * \n
  * Lambda Environment Variable "S3_BUCKET_NAME"\n
+ * Lambda Environment Variable "scheduledEventRuleDurationMillis"\n
  * \n
  * Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
  * https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazons3.html\n
@@ -30,6 +28,9 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
 public class CloudWatchTimerLambda {
 
     protected final String s3BucketName = System.getenv("S3_BUCKET_NAME");
+
+    public final long scheduledEventRuleDurationMillis
+            = Long.parseLong(System.getenv("SCHEDULED_EVENT_RULE_EXPIRY_DURATION_MILLIS"));
 
     // https://docs.aws.amazon.com/lambda/latest/dg/with-scheduledevents-example.html
     public void handle(ScheduledEvent scheduledEvent) {
@@ -51,7 +52,10 @@ public class CloudWatchTimerLambda {
 
         } catch(AmazonS3Exception as3e){
             if(as3e.getStatusCode() == 404) {   // nothing already stored in S3 with timedExpirationKey
-                S3Util.putString(String.valueOf(System.currentTimeMillis()), s3BucketName, timedExpirationKey);
+                final String scheduleEventRuleExpiryMillis
+                        = String.valueOf(System.currentTimeMillis() + scheduledEventRuleDurationMillis);
+                S3Util.putString(scheduleEventRuleExpiryMillis, s3BucketName, timedExpirationKey);
+                log(timedExpirationKey + " is " + scheduleEventRuleExpiryMillis);
 
             } else {
                 throw as3e;
