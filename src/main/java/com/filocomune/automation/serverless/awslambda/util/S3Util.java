@@ -14,6 +14,7 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
  * Action "s3:PutObject" (in i.e: Policy "AWSLambdaExecute")\n
  * Action "s3:List*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
  * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
+ * Action "s3:DeleteObject"\n
  */
 public class S3Util {
 
@@ -80,6 +81,22 @@ public class S3Util {
         }
 
         return string;
+    }
+
+    /**
+     * Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
+     * Action "s3:List*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
+     * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
+     * Action "s3:DeleteObject"\n
+     *
+     * @param bucketName
+     * @param key
+     */
+    public static void delete(String bucketName, String key){
+        // Get metadata before deleting
+        final String eTag = amazonS3.getObjectMetadata(bucketName, key).getETag();
+        amazonS3.deleteObject(bucketName, key);
+        log("Deleted S3Object {eTag: " + eTag + "}");
     }
 
 }

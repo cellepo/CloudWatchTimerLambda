@@ -12,7 +12,8 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
 
 /**
  * AWS Lambda triggered by CloudWatch Rule, that keys (by "expiration-<scheduledEventARN>") current time String
- * into S3_BUCKET_NAME if not already keyed there to a prior time, otherwise disables the CloudWatch Rule.\n
+ * into S3_BUCKET_NAME if not already keyed there to a prior time,
+ *  otherwise disables the CloudWatch Rule and deletes the time stored in S3.\n
  * \n
  * Lambda Environment Variable "S3_BUCKET_NAME"\n
  * \n
@@ -21,6 +22,7 @@ import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeU
  * Action "s3:List*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
  * Action "s3:Get*" (in i.e: Policy "AmazonS3ReadOnlyAccess")\n
  * Action "s3:PutObject" (in i.e: Policy "AWSLambdaExecute")\n
+ * Action "s3:DeleteObject"\n
  * https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/permissions-reference-cwe.html\n
  * Action "events:DisableRule"\n
  */
@@ -41,6 +43,7 @@ public class CloudWatchTimerLambda {
                 CloudWatchUtil.disableRule(scheduledEventARN);
                 log( "  (expired at " + scheduledEventRuleExpirationMillis + ")");
 
+                S3Util.delete(s3BucketName, timedExpirationKey);
 
             } else {
                 log(timedExpirationKey + " is " + scheduledEventRuleExpirationMillis);

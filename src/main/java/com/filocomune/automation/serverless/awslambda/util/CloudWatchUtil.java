@@ -8,7 +8,7 @@ import com.amazonaws.services.cloudwatchevents.model.DisableRuleRequest;
 import static com.filocomune.automation.serverless.awslambda.util.LambdaRuntimeUtil.log;
 
 /**
- *  Action "logs:*" (ine i.e: Policy "AWSLambdaExecute")\n
+ *  Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
  *  https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/permissions-reference-cwe.html\n
  *  Action "events:DisableRule"\n
  */
@@ -22,7 +22,7 @@ public class CloudWatchUtil {
 
     /**
      * Action "events:DisableRule"\n
-     * Action "logs:*" (ine i.e: Policy "AWSLambdaExecute")\n
+     * Action "logs:*" (in i.e: Policy "AWSLambdaExecute")\n
      *
      * @param ruleARN String
      * @throws {@link AmazonCloudWatchEventsException}
